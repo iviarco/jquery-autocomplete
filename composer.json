@@ -8,5 +8,6 @@
             "email": "markdaryljerezon@gmail.com"
         }
     ],
+    "minimum-stability": "stable",
     "require": {}
 }
