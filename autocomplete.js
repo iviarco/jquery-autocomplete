@@ -29,11 +29,12 @@ function autocomplete(input, data){
 			if (data[i].data.substr(0, val.length).toUpperCase() == val.toUpperCase()) {
 			  	/*create a DIV element for each matching element:*/
 				b = $('<div/>');
-			  	/*make the matching letters bold:*/
-				b.append('<strong>' + data[i].data.substr(0, val.length) + '</strong>')
-				b.append(data[i].data.substr(val.length));
+				/*make the matching letters bold:*/
+				list = data[i].list ? data[i].list : data[i].data;
+				b.append('<strong>' + list.substr(0, val.length) + '</strong>')
+				b.append(list.substr(val.length));
 				/*insert a input field that will hold the current array item's value:*/
-				b.append('<input type="hidden" data-id="' + data[i].id + '" value="' + data[i].data + '">');
+				b.append('<input type="hidden" data-id="' + data[i].id + '" value="' + (data[i].list ? data[i].data : data[i].data) + '">');
 				/*execute a function when someone clicks on the item value (DIV element):*/
 				b.click(function(){
 					/*insert the value for the autocomplete text field:*/
