@@ -4,7 +4,7 @@
 *
 */
 
-function autocomplete(input, data){
+function autocomplete(input, data, callback){
 	let currentFocus;
 
 	/*input listeners*/
@@ -36,10 +36,13 @@ function autocomplete(input, data){
 				/*insert a input field that will hold the current array item's value:*/
 				b.append('<input type="hidden" data-id="' + data[i].id + '" value="' + (data[i].list ? data[i].data : data[i].data) + '">');
 				/*execute a function when someone clicks on the item value (DIV element):*/
+				let extra = data[i].extras
 				b.click(function(){
 					/*insert the value for the autocomplete text field:*/
 					$(input).data( 'id', $($(this).children()[1]).data('id') );
 					$(input).val( $(this).children()[1].value );
+					// callback when clicked
+					callback(extra);
 					/*close the list of autocompleted values,
 					(or any other open lists of autocompleted values:*/
 					closeAllLists();
