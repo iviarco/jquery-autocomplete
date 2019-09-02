@@ -1,114 +1,192 @@
 /**
 *
-* simplified JQUERY autocomplete
+* simplified JQUERY autocomplete ES6 version
+* version 2.0
 *
 */
 
-function autocomplete(input, data, callback){
-	let currentFocus;
+class autocomplete {
 
-	/*input listeners*/
-	$(input).on('input',function(){
-		let a, b, i, val = $(this).val();
-		/*close any already open lists of autocompleted values*/
-		closeAllLists();
-		if (!val) { return false;}
-		currentFocus = -1;
-		/*create a DIV element that will contain the items (values):*/
-		a = $('<div>', {
-			id: this.id + '-autocomplete-list',
-			class: 'autocomplete-items',
+	constructor(input, data=''){
+		this._data = data;
+		this._input = input[0];
+		this._promise = '';
+		this._currentFocus = 0;
+		this._hasData = false;
+
+		// initialize key events
+		this._oninput();
+		this._onkeydown();
+		this._onclick();
+	}
+
+	/*
+	*	input keyup event
+	*/
+	_oninput(){
+		$(this._input).on('input', x =>{
+			x.preventDefault();
+			let list, listItem;
+
+			let that = this;
+			let input = x.target;
+			let value = x.target.value;
+			let id = x.target.id;
+			// if value is empty stops here
+			if(!value) return false;
+
+			// close any open lists of autocomplete values
+			this._closeAllLists();
+
+			this._currentFocus = -1;
+
+			// create a DIV element that will contain the items (values)
+			list = $('<div>', {
+				id: id + '-autocomplete-list',
+				class: 'autocomplete-items',
+			});
+
+			// append the DIV element as a child of the autocomplete container: 
+			$(input).parent().append(list);
+
+			// for each item in the array...
+			for (let i = 0; i < this._data.length; i++) {
+
+				// check if the item starts with the same letters as the text field value:
+				if(this._data[i].data.substr(0, value.length).toUpperCase() == value.toUpperCase()){
+
+					// create a DIV element for each matching element
+					listItem = $('<div/>');
+					let _list = this._data[i].list ? this._data[i].list : this._data[i].data;
+					$(listItem).append('<strong>' + _list.substr(0, value.length) + '</strong>');
+					$(listItem).append(_list.substr(value.length));
+
+					// insert a input field that will hold the current array item's value
+					$(listItem).append('<input type="hidden" data-id="' + this._data[i].id + '" value="' + (this._data[i].list ? this._data[i].list : this._data[i].data) + '">');
+
+					// excute a function when someone clicks on the item value (DIV element)
+					$(listItem).click(function(){
+
+						// insert the value for th autocomplete text field
+						$(input).data('id', $($(this).children()[1]).data('id'));
+						$(input).val($(this).children()[1].value)
+						
+						// close the list of autocompleted values,
+						// (or any other open lists of autocompleted values)					
+						that._hideAllLists();
+					});
+
+					// add items to list
+					$(list).append(listItem);
+
+					this._hasData = true;
+				}
+				else{
+					this.has_data = false;
+				}
+			}
 		});
+	}
 
-		/*append the DIV element as a child of the autocomplete container:*/
-		$(this).parent().append(a);
-
-		/*for each item in the array...*/
-		for (i = 0; i < data.length; i++) {
-			/*check if the item starts with the same letters as the text field value:*/
-			if (data[i].data.substr(0, val.length).toUpperCase() == val.toUpperCase()) {
-			  	/*create a DIV element for each matching element:*/
-				b = $('<div/>');
-				/*make the matching letters bold:*/
-				list = data[i].list ? data[i].list : data[i].data;
-				b.append('<strong>' + list.substr(0, val.length) + '</strong>')
-				b.append(list.substr(val.length));
-				/*insert a input field that will hold the current array item's value:*/
-				b.append('<input type="hidden" data-id="' + data[i].id + '" value="' + (data[i].list ? data[i].data : data[i].data) + '">');
-				/*execute a function when someone clicks on the item value (DIV element):*/
-				let extra = data[i].extras
-				b.click(function(){
-					/*insert the value for the autocomplete text field:*/
-					$(input).data( 'id', $($(this).children()[1]).data('id') );
-					$(input).val( $(this).children()[1].value );
-					// callback when clicked
-					callback(extra);
-					/*close the list of autocompleted values,
-					(or any other open lists of autocompleted values:*/
-					closeAllLists();
-				});
-				a.append(b);
+	/*
+	*	input keydown event
+	*/
+	_onkeydown(){
+		$(this._input).keydown( e => {
+			let x = $('#' + e.target.id + '-autocomplete-list');
+			if(x) x = $(x).find('div');
+			switch(e.keyCode){
+				// down
+				case 40:
+					// show existing list
+					this._showAllLists();
+					// If the arrow DOWN key is pressed,
+					// increase the currentFocus variable
+					this._currentFocus++;
+					// and and make the current item more visible
+					this._addActive(x);
+					break;
+				// up
+				case 38:
+					// show existing list
+					this._showAllLists();
+					// If the arrow UP key is pressed,
+					// decrease the currentFocus variable
+					this._currentFocus--;
+					// and and make the current item more visible
+					this._addActive(x);
+					break;
+				// enter
+				case 13: 
+					//If the ENTER key is pressed, prevent the form from being submitted
+					e.preventDefault();
+					if (this._currentFocus > -1) {
+						// and simulate a click on the "active" item
+						if (x) x[this._currentFocus].click();
+					}
+					break;
 			}
-		}
-	});
+		});
+	}
 
-	$(input).keydown(function(e){
-		let x = $(this.id + '-autocomplete');
-		// console.log(x)
-		// if(x) x = $(x).getElementsByTagName("div");
-		if (e.keyCode == 40) {
-			/*If the arrow DOWN key is pressed,
-			increase the currentFocus variable:*/
-			currentFocus++;
-			/*and and make the current item more visible:*/
-			addActive(x);
-		} else if (e.keyCode == 38) { //up
-			/*If the arrow UP key is pressed,
-			decrease the currentFocus variable:*/
-			currentFocus--;
-			/*and and make the current item more visible:*/
-			addActive(x);
-		} else if (e.keyCode == 13) {
-			/*If the ENTER key is pressed, prevent the form from being submitted,*/
-			e.preventDefault();
-			if (currentFocus > -1) {
-				/*and simulate a click on the "active" item:*/
-				if (x) x[currentFocus].click();
-			}
-		}
-	});
+	_onclick(){
+		$(this._input).click(e=>{
+			this._showAllLists();
+		});
+	}
 
-	function addActive(x) {
-		/*a function to classify an item as "active":*/
+	_closeAllLists(){
+		// close all autocomplete lists in the document 
+		let x = $('.autocomplete-items');
+		for (let i = 0; i < x.length; i++){
+			x[i].parentNode.removeChild(x[i]);
+		}
+	}
+
+	_hideAllLists(){
+		$('.autocomplete-items').hide();
+	}
+
+	_showAllLists(){
+		$('.autocomplete-items').show();
+	}
+
+	_addActive(x) {
+		// a function to classify an item as "active"
 		if (!x) return false;
-		/*start by removing the "active" class on all items:*/
-		removeActive(x);
-		if (currentFocus >= x.length) currentFocus = 0;
-		if (currentFocus < 0) currentFocus = (x.length - 1);
-		/*add class "autocomplete-active":*/
-		x[currentFocus].classList.add("autocomplete-active");
+		// start by removing the "active" class on all items
+		this._removeActive(x);
+		if (this._currentFocus >= x.length) this._currentFocus = 0;
+		if (this._currentFocus < 0) this._currentFocus = (x.length - 1);
+		// add class "autocomplete-active"
+		$(x[this._currentFocus]).addClass("autocomplete-active");
 	}
 
-	function removeActive(x) {
-		/*a function to remove the "active" class from all autocomplete items:*/
+	_removeActive(x) {
+		// a function to remove the "active" class from all autocomplete items
 		for (var i = 0; i < x.length; i++) {
-			x[i].classList.remove("autocomplete-active");
+			$(x[i]).removeClass("autocomplete-active");
 		}
 	}
 
-	function closeAllLists(elmnt) {
-		/*close all autocomplete lists in the document,
-		except the one passed as an argument:*/
-		var x = $(".autocomplete-items");
-		for (var i = 0; i < x.length; i++) {
-			if (elmnt != x[i] && elmnt != input) {
-				x[i].parentNode.removeChild(x[i]);
-			}
-		}
+	/*
+	*	jQuery Request
+	*/
+	post(link, params=''){
+		if(typeof link != 'string') throw 'error: first arg should be string';
+		if(typeof params != 'object' && params!='')  throw 'error: second arg should be object';
+		this._promise = $.post(link);
+		return this._promise;
+	}
+
+	/*
+	*	jQuery Promise
+	*/
+	then(__promise){
+		this._promise.then(res=>__promise(res));
+	}
+
+	setData(list){
+		this._data = list;
 	}
 }
-
-/*execute a function when someone clicks in the document:*/
-$(document).click(function (e) {
-	// closeAllLists(e.target);
-});
