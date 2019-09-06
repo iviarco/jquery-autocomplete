@@ -70,3 +70,12 @@ ac.post('/material.json')
     // pass list[] to setData() that serves as the items for the dropdown.
 	ac.setData(list);
 });
+```
+
+A callback when item is selected.
+
+```js 
+ 	ac.itemSelected((id, val, input)=>{
+		 // do awesome here...
+    });
+```	
