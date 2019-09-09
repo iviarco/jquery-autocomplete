@@ -5,7 +5,7 @@ Autocomplete
 [![Latest Unstable Version](https://poser.pugx.org/iviarco/jquery-autocomplete/v/unstable)](https://packagist.org/packages/iviarco/jquery-autocomplete)
 [![License](https://poser.pugx.org/iviarco/jquery-autocomplete/license)](https://packagist.org/packages/iviarco/jquery-autocomplete)
 
-***Autocomplete*** makes it so easy for you to manipulate input dropdown and fetch data that returns ***`jQuery promise`***. Autocomplete is based in ***`jQuery ^3`*** and ***`ES6 syntax`***.
+***Autocomplete*** makes it so easy for you to manipulate input dropdown and fetch data that returns ***`jQuery promise`***. Autocomplete is based on ***`jQuery ^3`*** and ***`ES6 syntax`***.
 
 ## Features
 
@@ -26,9 +26,11 @@ composer require iviarco/jquery-autocomplete
 
 **HTML**
 ```html
+<link rel="stylesheet" href="./vendor/iviarco/jquery-autocomplete/autocomplete.css"/>
 <div class="autocomplete">
 	<input type="text" id="input" name="input" placeholder="Search" aria-label="Search"/>
 </div>
+<script src="./vendor/iviarco/jquery-autocomplete/autocomplete.js"></script>
 ```
 
 **Javascript**
@@ -52,14 +54,14 @@ let ac = new autocomplete($('#input'), [
 // instantiate with $('#input')
 let ac = new autocomplete($('#input'));
 
-// post request
-ac.post('/material.json')
+// request
+$.post('/material.json')
 
 // jQuery promise
 .then(res=>{
 	let list = [];
     
-    // populate list[];
+    	// populate list[];
 	$.each(res.data, (e, data)=>{
 		list.push({
 			id: data.material_id,
@@ -67,7 +69,7 @@ ac.post('/material.json')
 		});
 	});
     
-    // pass list[] to setData() that serves as the items for the dropdown.
+    	// pass list[] to setData() that serves as the items for the dropdown.
 	ac.setData(list);
 });
 ```
@@ -75,7 +77,7 @@ ac.post('/material.json')
 A callback when item is selected.
 
 ```js 
- 	ac.itemSelected((id, val, input)=>{
-		 // do awesome here...
-    });
+ac.itemSelected((id, val, input)=>{
+	// do awesome here...
+});
 ```	
