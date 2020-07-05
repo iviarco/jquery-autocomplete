@@ -81,13 +81,18 @@ class autocomplete {
                       
                     // add items to list
                     $(list).append(listItem);
-  
+
+                    // remove styling when data not exist
+                    $('#categoryId').removeAttr('style')
+
                     // update _items
                     this._items.push($(listItem[0]).children()[1])
   
                     this._hasData = true;
                 }
                 else{
+                    // add styling when data not exist
+                    $('#categoryId').css('border-color','red')
                     this.has_data = false;
                 }
             }
