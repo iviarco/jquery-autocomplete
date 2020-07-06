@@ -82,8 +82,7 @@ class autocomplete {
                     // add items to list
                     $(list).append(listItem);
 
-                    // remove styling when data not exist
-                    $('#categoryId').removeAttr('style')
+                    $(input).removeAttr('style')
 
                     // update _items
                     this._items.push($(listItem[0]).children()[1])
@@ -91,8 +90,7 @@ class autocomplete {
                     this._hasData = true;
                 }
                 else{
-                    // add styling when data not exist
-                    $('#categoryId').css('border-color','red')
+                    $(input).css('border-color','red')
                     this.has_data = false;
                 }
             }
